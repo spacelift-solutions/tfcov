@@ -1,0 +1,51 @@
+version: 2
+
+builds:
+  - main: ./cmd/tfcov
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    # ldflags are left at goreleaser's default, which strips symbols and stamps
+    # main.version/commit/date for `tfcov -version`.
+    flags: [-trimpath, -v]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    binary: tfcov
+
+archives:
+  - formats: [tar.gz]
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+# Changelogs are generated from commit subjects between tags and grouped by
+# conventional-commit prefix, so keep commit messages in that shape. Anything
+# that doesn't match a group lands under "Other changes"; pure housekeeping
+# (chore/ci/test/style) is dropped from the notes entirely.
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^feat(\([^)]*\))?!?:'
+      order: 0
+    - title: Bug fixes
+      regexp: '^fix(\([^)]*\))?!?:'
+      order: 1
+    - title: Documentation
+      regexp: '^docs(\([^)]*\))?!?:'
+      order: 2
+    - title: Other changes
+      order: 999
+  filters:
+    exclude:
+      - '^chore(\([^)]*\))?!?:'
+      - '^ci(\([^)]*\))?!?:'
+      - '^test(\([^)]*\))?!?:'
+      - '^style(\([^)]*\))?!?:'
+
+release:
+  # Tags with a semver pre-release suffix (e.g. v1.2.0-rc.1) publish as GitHub
+  # pre-releases: assets are downloadable, but excluded from /releases/latest.
+  prerelease: auto

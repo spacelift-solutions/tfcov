@@ -1,0 +1,39 @@
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+    name: Test the code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with: { go-version-file: go.mod }
+
+      - name: Check formatting using gofmt
+        run: gofmt -s -l -d .
+
+      - name: Test with coverage
+        run: go test ./...
+
+  release:
+    name: Test the release process
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with: { go-version-file: go.mod }
+
+      - name: Test creating a snapshot release
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          args: build --snapshot

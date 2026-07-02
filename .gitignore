@@ -1,0 +1,5 @@
+# goreleaser output
+dist/
+
+# local builds
+/tfcov
